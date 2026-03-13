@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Meal Prep" />
+  <meta name="theme-color" content="#121933" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <title>Meal Prep Planner</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121933;
+      --panel-2:#1a2345;
+      --text:#eef2ff;
+      --muted:#aab3d1;
+      --accent:#7c9cff;
+      --accent-2:#9f7cff;
+      --good:#5ee3a1;
+      --border:rgba(255,255,255,.08);
+      --shadow:0 18px 40px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,#070b16 0%, #0b1020 100%);
+      color:var(--text);
+      -webkit-text-size-adjust:100%;
+    }
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:24px 16px calc(env(safe-area-inset-bottom) + 90px);
+    }
+    @media (min-width:601px){
+      .wrap{padding-bottom:40px}
+    }
+    .hero{
+      background:linear-gradient(135deg,rgba(124,156,255,.2),rgba(159,124,255,.14));
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      border-radius:24px;
+      padding:22px;
+      margin-bottom:18px;
+    }
+    h1{
+      margin:0 0 8px;
+      font-size:clamp(1.6rem,4vw,2.5rem);
+      line-height:1.1;
+    }
+    .sub{
+      color:var(--muted);
+      margin:0;
+      line-height:1.5;
+    }
+    .chip-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+    .chip{
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:8px 14px;
+      color:#dfe6ff;
+      font-size:.95rem;
+      min-height:36px;
+      display:flex;
+      align-items:center;
+    }
+    .tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:18px 0 16px;
+    }
+    .tab-btn{
+      border:1px solid var(--border);
+      background:var(--panel);
+      color:var(--text);
+      padding:12px 16px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.18s ease;
+      box-shadow:var(--shadow);
+      -webkit-appearance:none;
+      font-size:1rem;
+    }
+    .tab-btn:hover{transform:translateY(-1px)}
+    .tab-btn.active{
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      border-color:transparent;
+    }
+
+    /* ── iPhone sticky bottom tab bar ── */
+    @media (max-width:600px){
+      .tabs{
+        position:fixed;
+        bottom:0;left:0;right:0;
+        margin:0;
+        padding:10px 12px env(safe-area-inset-bottom);
+        background:rgba(10,14,30,.92);
+        backdrop-filter:blur(20px);
+        -webkit-backdrop-filter:blur(20px);
+        border-top:1px solid var(--border);
+        z-index:100;
+        justify-content:space-around;
+        gap:8px;
+      }
+      .tab-btn{
+        flex:1;
+        padding:10px 6px;
+        font-size:.78rem;
+        border-radius:12px;
+        text-align:center;
+        line-height:1.2;
+      }
+    }
+    .tab-panel{
+      display:none;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .tab-panel.active{display:block}
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+      gap:16px;
+    }
+    .card{
+      background:var(--panel-2);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+    }
+    .card h2,.card h3{
+      margin:0 0 10px;
+      line-height:1.2;
+    }
+    .muted{color:var(--muted)}
+    .checklist{
+      display:grid;
+      gap:10px;
+      margin-top:8px;
+    }
+    label.item{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      padding:14px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      min-height:44px;
+    }
+    input[type="checkbox"]{
+      width:22px;height:22px;margin-top:2px;
+      accent-color:var(--good);
+      cursor:pointer;
+      flex:none;
+    }
+    .item span{
+      line-height:1.4;
+    }
+    .item small{
+      display:block;
+      color:var(--muted);
+      margin-top:2px;
+    }
+    .done{
+      opacity:.6;
+      text-decoration:line-through;
+    }
+    .combo-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .combo{
+      padding:12px;
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      font-size:.95rem;
+    }
+    .pill{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(94,227,161,.12);
+      border:1px solid rgba(94,227,161,.25);
+      color:#c8ffdf;
+      font-size:.8rem;
+      margin-top:6px;
+    }
+    .table-wrap{
+      border-radius:16px;
+      border:1px solid var(--border);
+      overflow:hidden;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
+    th,td{
+      text-align:left;
+      padding:12px;
+      border-bottom:1px solid var(--border);
+      vertical-align:top;
+      word-break:break-word;
+    }
+    th{
+      background:rgba(255,255,255,.04);
+      color:#dfe6ff;
+    }
+    tr:last-child td{border-bottom:none}
+
+    /* ── 4-col schedule table → stacked cards on mobile ── */
+    @media (max-width:600px){
+      .schedule-table thead{display:none}
+      .schedule-table tr{
+        display:block;
+        border-bottom:1px solid var(--border);
+        padding:12px 0;
+      }
+      .schedule-table tr:last-child{border-bottom:none;padding-bottom:0}
+      .schedule-table tr:first-child{padding-top:0}
+      .schedule-table td{
+        display:flex;
+        gap:8px;
+        padding:4px 12px;
+        border-bottom:none;
+      }
+      .schedule-table td::before{
+        content:attr(data-label);
+        color:var(--muted);
+        font-size:.8rem;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:.06em;
+        min-width:72px;
+        flex:none;
+        padding-top:2px;
+      }
+    }
+    .footer-note{
+      margin-top:16px;
+      color:var(--muted);
+      font-size:.95rem;
+      line-height:1.5;
+    }
+    .two-col{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:16px;
+    }
+    @media (max-width: 850px){
+      .two-col{grid-template-columns:1fr}
+    }
+    .kicker{
+      font-size:.86rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#bfd0ff;
+      margin-bottom:8px;
+      font-weight:800;
+    }
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+    .action-btn{
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:14px 18px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:1rem;
+      -webkit-appearance:none;
+      min-height:44px;
+    }
+    .action-btn:hover{transform:translateY(-1px)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="kicker">Sunday meal prep app</div>
+      <h1>Chicken + Rice/Potatoes + Frozen Veggies</h1>
+      <p class="sub">Built for the super simple version: cook once on Sunday, fill the trays, refrigerate the near-term meals, and freeze the rest for later in the week. Tiny kitchen factory mode, minus the suffering.</p>
+      <div class="chip-row">
+        <div class="chip">24 meals total</div>
+        <div class="chip">8 combos × 3 each</div>
+        <div class="chip">10 lbs of chicken</div>
+        <div class="chip">5 cups of rice</div>
+        <div class="chip">7 lbs of potatoes</div>
+        <div class="chip">8 frozen veggie bags</div>
+      </div>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="shopping">Shop</button>
+      <button class="tab-btn" data-tab="prep">Cook</button>
+      <button class="tab-btn" data-tab="schedule">Eat</button>
+    </nav>
+
+    <section id="shopping" class="tab-panel active">
+      <div class="two-col">
+        <div class="card">
+          <h2>Shopping List</h2>
+          <p class="muted">This is based on maximizing variety: all 8 meal combinations, 3 trays each, for 24 total meals.</p>
+          <div class="checklist">
+            <label class="item"><input type="checkbox" data-check="shop1"><span><strong>10 pounds of chicken</strong><small>Enough for about 24 trays at roughly 6 oz cooked chicken each.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="shop2"><span><strong>Rice</strong><small>At least 5 rice-cooker scoops worth of dry rice. In most cookers that is about 3.75 US cups uncooked.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="shop3"><span><strong>7 pounds of potatoes</strong><small>For the mashed potato half of the trays.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="shop4"><span><strong>2 bags of frozen corn</strong><small>About 6 cups total.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="shop5"><span><strong>2 bags of frozen mixed vegetables</strong><small>About 6 cups total.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="shop6"><span><strong>2 bags of frozen broccoli</strong><small>About 6 cups total.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="shop7"><span><strong>2 bags of frozen asparagus</strong><small>About 6 cups total.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="shop8"><span><strong>Butter + milk</strong><small>For mashed potatoes.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="shop9"><span><strong>Salt, pepper, garlic powder</strong><small>Base seasoning for the chicken and potatoes.</small></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Meal Combo Target</h2>
+          <p class="muted">You wanted the full variety spread instead of accidentally going all-in on rice goblin mode.</p>
+          <div class="combo-grid">
+            <div class="combo"><strong>3×</strong> Chicken + Rice + Corn</div>
+            <div class="combo"><strong>3×</strong> Chicken + Rice + Mixed Veg</div>
+            <div class="combo"><strong>3×</strong> Chicken + Rice + Broccoli</div>
+            <div class="combo"><strong>3×</strong> Chicken + Rice + Asparagus</div>
+            <div class="combo"><strong>3×</strong> Chicken + Potatoes + Corn</div>
+            <div class="combo"><strong>3×</strong> Chicken + Potatoes + Mixed Veg</div>
+            <div class="combo"><strong>3×</strong> Chicken + Potatoes + Broccoli</div>
+            <div class="combo"><strong>3×</strong> Chicken + Potatoes + Asparagus</div>
+          </div>
+          <div class="pill">24 trays total</div>
+
+          <div class="footer-note">
+            <strong>Rice note:</strong> your rice cooker scoop measures <em>uncooked</em> rice. Most rice-cooker scoops are smaller than a US cup, so using <strong>5 scoops</strong> is a good target for about <strong>12 rice trays</strong>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="prep" class="tab-panel">
+      <div class="grid">
+        <div class="card">
+          <h2>Prep & Cook</h2>
+          <div class="checklist">
+            <label class="item"><input type="checkbox" data-check="prep1"><span><strong>1. Wash hands, clear counter, set out 24 meal trays</strong><small>Factory mode begins.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="prep2"><span><strong>2. Start rice cooker with 5 scoops of dry rice</strong><small>Fill water to line 5.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="prep3"><span><strong>3. Start Instant Pot chicken batch #1</strong><small>5 lbs of chicken + 1 cup of water + seasonings.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="prep4"><span><strong>4. Peel/chop/boil potatoes</strong><small>Boil until fork-tender, about 15–20 minutes.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="prep5"><span><strong>5. Start Instant Pot chicken batch #2</strong><small>Repeat the first batch.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="prep6"><span><strong>6. Mash potatoes</strong><small>Add butter, milk, salt, pepper, garlic powder.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="prep7"><span><strong>7. Let rice/chicken cool slightly</strong><small>Enough to portion without turning your fingertips into tragic little nuggets.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="prep8"><span><strong>8. Assemble all 24 trays</strong><small>Rice/potatoes + frozen veggies + chicken.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="prep9"><span><strong>9. Refrigerate 8–10 trays</strong><small>These are for the first 3–4 days.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="prep10"><span><strong>10. Freeze the remaining trays</strong><small>Label lids if you want to know what’s what later.</small></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Instant Pot Chicken</h2>
+          <p class="muted">Do this twice for the full 10 pounds.</p>
+          <div class="table-wrap"><table>
+            <tr><th>Item</th><th>Amount</th></tr>
+            <tr><td>Chicken breast</td><td>5 lbs per batch</td></tr>
+            <tr><td>Liquid</td><td>1 cup of water</td></tr>
+            <tr><td>Seasoning</td><td>Salt, pepper, garlic powder</td></tr>
+            <tr><td>Cook</td><td>10 minutes high pressure</td></tr>
+            <tr><td>Release</td><td>10 minutes natural release</td></tr>
+          </table></div>
+        </div>
+
+        <div class="card">
+          <h2>Mashed Potatoes</h2>
+          <p class="muted">This should give you enough for about 12 potato trays.</p>
+          <div class="table-wrap"><table>
+            <tr><th>Item</th><th>Amount</th></tr>
+            <tr><td>Potatoes</td><td>7 pounds</td></tr>
+            <tr><td>Butter</td><td>4–6 tbsp</td></tr>
+            <tr><td>Milk</td><td>½–1 cup</td></tr>
+            <tr><td>Seasoning</td><td>Salt, pepper, garlic powder</td></tr>
+          </table></div>
+          <div class="footer-note">
+            <strong>Steps:</strong> Peel potatoes if you want, chop into chunks, cover with salted water, boil 15–20 minutes until fork-tender, drain, add butter + milk + seasoning, then mash.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Assembly Math</h2>
+          <div class="table-wrap"><table>
+            <tr><th>Tray section</th><th>Target</th></tr>
+            <tr><td>Protein</td><td>About 6 ounces of cooked chicken</td></tr>
+            <tr><td>Carb</td><td>1 cup of cooked rice or mashed potatoes</td></tr>
+            <tr><td>Veggie</td><td>1 cup of frozen veggies, uncooked</td></tr>
+          </table></div>
+          <div class="footer-note">
+            Frozen veggies can go straight into the trays on Sunday. Refrigerator meals will thaw. Frozen meals will stay frozen. Microwave later and they’ll steam/cook inside the container.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Quick Assembly Layout</h2>
+          <div class="checklist">
+            <label class="item"><input type="checkbox" data-check="layout1"><span><strong>Make 12 rice trays</strong><small>3 each with corn, mixed veggies, broccoli, asparagus.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="layout2"><span><strong>Make 12 potato trays</strong><small>3 each with corn, mixed veggies, broccoli, asparagus.</small></span></label>
+            <label class="item"><input type="checkbox" data-check="layout3"><span><strong>Add chicken to all trays last</strong><small>Helps you portion evenly across the whole batch.</small></span></label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="schedule" class="tab-panel">
+      <div class="card" style="margin-bottom:16px;">
+        <h2>Daily schedule: eat + move from freezer to fridge</h2>
+        <p class="muted">This is a simple default rhythm. Adjust the number of trays you move based on whether the kids eat them that day. The idea is just to keep the next 1–2 days thawing and ready.</p>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap"><table class="schedule-table">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>What to eat</th>
+              <th>What to move</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td data-label="Day"><strong>Sunday</strong></td>
+            <td data-label="Eat">Freshly prepped meals</td>
+            <td data-label="Move">No move needed yet</td>
+            <td data-label="Notes">Put 8–10 trays in the fridge and the rest in the freezer after prep.</td>
+          </tr>
+          <tr>
+            <td data-label="Day"><strong>Monday</strong></td>
+            <td data-label="Eat">Eat from fridge</td>
+            <td data-label="Move">Nothing yet, unless fridge stock is getting low</td>
+            <td data-label="Notes">Good day to use the freshest rice trays first if you want.</td>
+          </tr>
+          <tr>
+            <td data-label="Day"><strong>Tuesday</strong></td>
+            <td data-label="Eat">Eat from fridge</td>
+            <td data-label="Move">Move 2–4 trays from freezer to fridge</td>
+            <td data-label="Notes">These become Thursday-ish meals.</td>
+          </tr>
+          <tr>
+            <td data-label="Day"><strong>Wednesday</strong></td>
+            <td data-label="Eat">Eat from fridge</td>
+            <td data-label="Move">Move 2–4 trays from freezer to fridge</td>
+            <td data-label="Notes">These become Friday-ish meals.</td>
+          </tr>
+          <tr>
+            <td data-label="Day"><strong>Thursday</strong></td>
+            <td data-label="Eat">Eat fridge trays, including thawed ones</td>
+            <td data-label="Move">Move 2–4 trays from freezer to fridge</td>
+            <td data-label="Notes">These become Saturday-ish meals.</td>
+          </tr>
+          <tr>
+            <td data-label="Day"><strong>Friday</strong></td>
+            <td data-label="Eat">Eat fridge trays, including thawed ones</td>
+            <td data-label="Move">Move 2–4 trays from freezer to fridge</td>
+            <td data-label="Notes">These become Sunday-ish meals if needed.</td>
+          </tr>
+          <tr>
+            <td data-label="Day"><strong>Saturday</strong></td>
+            <td data-label="Eat">Eat whatever is thawed in the fridge</td>
+            <td data-label="Move">Optional: only move more if you still need meals before next prep day</td>
+            <td data-label="Notes">Use this as your flex day for lunches, kids, or surprise chaos.</td>
+          </tr>
+          </tbody>
+        </table></div>
+        <div class="footer-note">
+          <strong>Microwave tip:</strong> crack the lid slightly. Fridge meals usually need about 2–3 minutes. Frozen meals usually need about 4–5 minutes, sometimes more depending on your microwave and tray size.
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="action-btn" id="resetChecks">Reset all checkboxes</button>
+        <button class="action-btn" id="printPage">Print / Save as PDF</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        tabButtons.forEach(b => b.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(tab).classList.add('active');
+        localStorage.setItem('mealprep-active-tab', tab);
+      });
+    });
+
+    const savedTab = localStorage.getItem('mealprep-active-tab');
+    if (savedTab) {
+      const savedBtn = document.querySelector(`.tab-btn[data-tab="${savedTab}"]`);
+      const savedPanel = document.getElementById(savedTab);
+      if (savedBtn && savedPanel) {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        savedBtn.classList.add('active');
+        savedPanel.classList.add('active');
+      }
+    }
+
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-check]');
+    checkboxes.forEach(cb => {
+      const key = 'mealprep-' + cb.dataset.check;
+      const saved = localStorage.getItem(key);
+      if (saved === 'true') cb.checked = true;
+      syncDone(cb);
+
+      cb.addEventListener('change', () => {
+        localStorage.setItem(key, cb.checked);
+        syncDone(cb);
+      });
+    });
+
+    function syncDone(cb){
+      const label = cb.closest('.item');
+      const text = label.querySelector('span');
+      if (cb.checked) text.classList.add('done');
+      else text.classList.remove('done');
+    }
+
+    document.getElementById('resetChecks').addEventListener('click', () => {
+      if (!confirm('Reset all checklist items?')) return;
+      checkboxes.forEach(cb => {
+        cb.checked = false;
+        localStorage.removeItem('mealprep-' + cb.dataset.check);
+        syncDone(cb);
+      });
+    });
+
+    document.getElementById('printPage').addEventListener('click', () => {
+      window.print();
+    });
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>

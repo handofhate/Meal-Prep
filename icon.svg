@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#121933"/>
+  <!-- plate -->
+  <circle cx="256" cy="272" r="148" fill="#1a2345"/>
+  <circle cx="256" cy="272" r="148" fill="none" stroke="rgba(124,156,255,0.35)" stroke-width="6"/>
+  <!-- fork -->
+  <g fill="#7c9cff">
+    <rect x="152" y="158" width="10" height="60" rx="5"/>
+    <rect x="168" y="158" width="10" height="60" rx="5"/>
+    <rect x="184" y="158" width="10" height="60" rx="5"/>
+    <rect x="152" y="210" width="42" height="10" rx="5"/>
+    <rect x="161" y="215" width="10" height="90" rx="5"/>
+  </g>
+  <!-- food on plate: chicken -->
+  <ellipse cx="256" cy="258" rx="68" ry="44" fill="#5ee3a1" opacity=".85"/>
+  <ellipse cx="256" cy="252" rx="52" ry="32" fill="#3ec485"/>
+  <!-- rice/potato mound -->
+  <ellipse cx="214" cy="300" rx="38" ry="22" fill="#aab3d1" opacity=".6"/>
+  <!-- veggie dots -->
+  <circle cx="296" cy="298" r="10" fill="#9f7cff" opacity=".9"/>
+  <circle cx="316" cy="285" r="8" fill="#7c9cff" opacity=".9"/>
+  <circle cx="308" cy="310" r="7" fill="#5ee3a1" opacity=".8"/>
+</svg>

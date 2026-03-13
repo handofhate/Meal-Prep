@@ -1,0 +1,18 @@
+{
+  "name": "Meal Prep Planner",
+  "short_name": "Meal Prep",
+  "description": "Sunday chicken + rice/potatoes + frozen veggie meal prep tracker",
+  "start_url": "./meal%20prep%20planner.html",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#121933",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
